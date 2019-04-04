@@ -15,6 +15,7 @@
 #include "get_next_line.h"
 #include "libft.h"
 #include "internal.h"
+#include "visualisator.h"
 
 static void		ft_tabdel(char **tab)
 {
@@ -91,7 +92,7 @@ static t_bool	ft_reader_file_new_salle(t_pchar line, t_salle *salle)
 	(*salle).id = id++;
 	(*salle).link = NULL;
 	(*salle).name = ft_strdup(tab[0]);
-	(*salle).position.x = ft_atoi(tab[1]) + 1;
+	(*salle).position.x = ft_atoi(tab[1]) + 1 + MARGE_X;
 	(*salle).position.y = ft_atoi(tab[2]);
 	(*salle).fourmis = NULL;
 	(*salle).path = FALSE;
@@ -300,6 +301,9 @@ extern t_bool	ft_reader(void)
 		return (FALSE);
 	if (!ft_reader_turn(&turn))
 		return (FALSE);
+
+	fclose(stdin);
+	stdin = fopen("/dev/tty", "r");
 	if (!ft_visualisator(map, turn, link))
 		return (FALSE);
 	FT_DEBUG("%s", "OK");

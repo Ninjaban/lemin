@@ -16,6 +16,7 @@
 #include "libft.h"
 #include "error.h"
 #include "internal.h"
+#include "visualisator.h"
 
 static void			ft_visualisator_init(WINDOW **window)
 {
@@ -71,18 +72,11 @@ static t_position	ft_visualisator_draw_link_path(t_position A, t_position B, t_b
 		C.y = A.y;
 		C.x = A.x + C.x / ((ABS(C.x)) ? ABS(C.x) : 1);
 	}
-//	else if (ABS(C.x) < ABS(C.y))
 	else
 	{
 		C.x = A.x;
 		C.y = A.y + C.y / ((ABS(C.y)) ? ABS(C.y) : 1);
-	}/*
-	else
-	{
-		C.x = A.x + C.x / ABS(C.x);
-		C.y = A.y + C.y / ABS(C.y);
-	}*/
-
+	}
 	return (C);
 }
 
@@ -117,42 +111,33 @@ static t_position	ft_visualisator_draw_link_path_next(t_position A, t_uint nbr)
 		C.y = A.y;
 		C.x = A.x - 1;
 	}
-//	else if (nbr == 4)
 	else
 	{
 		C.y = A.y - 1;
 		C.x = A.x;
-	}/*
-	else if (nbr == 5)
-	{
-		C.y = A.y + 1;
-		C.x = A.x + 1;
 	}
-	else if (nbr == 6)
-	{
-		C.y = A.y + 1;
-		C.x = A.x - 1;
-	}
-	else if (nbr == 7)
-	{
-		C.y = A.y - 1;
-		C.x = A.x - 1;
-	}
-	else
-	{
-		C.y = A.y - 1;
-		C.x = A.x + 1;
-	}*/
 	return (C);
+}
+
+static t_bool		ft_visualisator_draw_link_check(t_position A, t_end_link B)
+{
+	if (A.x >= B.xmin && A.x <= B.xmax && A.y >= B.ymin && A.y <= B.ymax)
+	{
+		if ((A.x == B.xmin && A.y == B.ymin) || (A.x == B.xmax && A.y == B.ymax) ||
+			(A.x == B.xmin && A.y == B.ymax) || (A.x == B.xmax && A.y == B.ymin))
+			return (FALSE);
+		return (TRUE);
+	}
+	return (FALSE);
 }
 
 static t_bool		ft_visualisator_draw_link_rec(t_position A, t_end_link B, char tab[WINDOW_SIZE_Y][WINDOW_SIZE_X], WINDOW *window, t_position (*queue)[QUEUE_SIZE], int nbr)
 {
 	t_position		C;
 
-	if (A.x >= B.xmin && A.x <= B.xmax && A.y >= B.ymin && A.y <= B.ymax)
+	if (ft_visualisator_draw_link_check(A, B))
 		return (ft_visualisator_draw_link_print(A, queue, nbr));
-	if (A.x <= 0 || A.y < 0 || A.x >= WINDOW_SIZE_X || A.y >= WINDOW_SIZE_Y)
+	if (A.x <= MARGE_X || A.y < 0 || A.x >= WINDOW_SIZE_X || A.y >= WINDOW_SIZE_Y)
 		return (FALSE);
 
 	if (tab[A.y][A.x] != FALSE || mvwinch(window, A.y, A.x) != ' ')
@@ -176,7 +161,7 @@ static t_bool		ft_visualisator_draw_link_launch(t_position A, t_end_link B, char
 	t_position		C;
 	t_position		D;
 
-	if (A.x >= B.xmin && A.x <= B.xmax && A.y >= B.ymin && A.y <= B.ymax)
+	if (ft_visualisator_draw_link_check(A, B))
 		return (ft_visualisator_draw_link_print(A, queue, nbr));
 	if (tab[A.y][A.x] != FALSE || mvwinch(window, A.y, A.x) == '*')
 		return (FALSE);
@@ -206,20 +191,7 @@ static t_bool		ft_visualisator_draw_link_launch(t_position A, t_end_link B, char
 	}
 	return (FALSE);
 }
-/*
-static int			ft_visualisator_draw_link_size(t_position A, t_position B)
-{
-	return (ABS((B.x - A.x)) + ABS((B.y - A.y)));
-}
-*/
-/*
-static t_bool		ft_visualisator_draw_link_check(t_position A, t_end_link B)
-{
-	if (A.x >= B.xmin && A.x <= B.xmax && A.y >= B.ymin && A.y <= B.ymax)
-		return (TRUE);
-	return (FALSE);
-}
-*/
+
 static t_bool		ft_visualisator_draw_link_isadj(t_position A, t_position B)
 {
 	int		k;
@@ -247,7 +219,6 @@ static void			ft_visualisator_draw_link_epur(t_position (*queue)[QUEUE_SIZE])
 {
 	t_bool		doSomething;
 
-//	return;
 	doSomething = TRUE;
 	while (doSomething == TRUE)
 	{
@@ -261,7 +232,6 @@ static void			ft_visualisator_draw_link_epur(t_position (*queue)[QUEUE_SIZE])
 					doSomething = TRUE;
 				}
 			}
-
 	}
 }
 
@@ -338,10 +308,45 @@ static t_bool		ft_visualisator_draw_link(t_lst *link, WINDOW *window)
 		B.ymax = B.end.y + 1;
 
 		ft_visualisator_draw_link_init(data->A->position, B, tab, window);
-		wrefresh(window);
 
 		tmp = tmp->next;
 	}
+	return (TRUE);
+}
+
+static t_bool		ft_visualisator_menu(WINDOW *window)
+{
+	t_pchar		menu[MENU_SIZE] = {"Suivant", "Précédent", "Quitter"};
+	int			choix;
+	int			highlight;
+
+	highlight = 0;
+	mvwvline(window, 0, MARGE_X - 1, ACS_VLINE, WINDOW_SIZE_Y);
+	nodelay(window, FALSE);
+	notimeout(window, FALSE);
+	keypad(window, TRUE);
+	while (1)
+	{
+		for (int i = 0 ; i < MENU_SIZE ; ++ i)
+		{
+			if (i == highlight)
+				wattron(window, A_REVERSE);
+			mvwprintw(window, i + 1, 2, menu[i]);
+			wattroff(window, A_REVERSE);
+		}
+//		sleep(1);
+		wrefresh(window);
+		choix = wgetch(window);
+//		FT_DEBUG("Choix : %d Enter %d", choix, KEY_ENTER);
+
+		if (choix == KEY_UP)
+			highlight = (highlight - 1 >= 0) ? highlight - 1 : highlight;
+		else if (choix == KEY_DOWN)
+			highlight = (highlight + 1 < MENU_SIZE) ? highlight + 1 : highlight;
+		else if (choix == 10 && highlight == MENU_EXIT)
+			return (TRUE);
+	}
+//	FT_DEBUG("Choix : %d", choix);
 	return (TRUE);
 }
 
@@ -350,11 +355,11 @@ static t_bool		ft_visualisator_main(t_map map, t_lst *turn, t_lst *link, WINDOW 
 	(void)turn;
 	if (!ft_visualisator_draw_room(map, window, FALSE))
 		return (FALSE);
-	wrefresh(window);
 	if (!ft_visualisator_draw_link(link, window))
 		return (FALSE);
-	wrefresh(window);
 	if (!ft_visualisator_draw_room(map, window, TRUE))
+		return (FALSE);
+	if (!ft_visualisator_menu(window))
 		return (FALSE);
 	wrefresh(window);
 	return (TRUE);
@@ -367,7 +372,6 @@ extern t_bool		ft_visualisator(t_map map, t_lst *turn, t_lst *link)
 	setlocale(LC_ALL, "fr_FR.UTF-8");
 	ft_visualisator_init(&window);
 	ft_visualisator_main(map, turn, link, window);
-	sleep(25);
 	delwin(window);
 	endwin();
 	return (TRUE);

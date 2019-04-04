@@ -16,9 +16,6 @@
 
 #include "types.h"
 
-# define WINDOW_SIZE_X		100
-# define WINDOW_SIZE_Y		40
-
 # define QUEUE_SIZE			(WINDOW_SIZE_X * WINDOW_SIZE_Y)
 
 typedef struct		s_fourmis

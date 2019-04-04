@@ -64,12 +64,8 @@ static void			ft_path_print(t_lst *path)
 	while (tmp)
 	{
 		link = ((t_path *)(tmp->data))->link;
-		FT_DEBUG("%d | ", ((t_path *)tmp->data)->size);
 		while (link)
-		{
-			FT_DEBUG("%s -> ", ((t_salle *)link->data)->name);
 			link = link->next;
-		}
 		tmp = tmp->next;
 	}
 }
