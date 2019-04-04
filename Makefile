@@ -54,7 +54,7 @@ all				:	$(DIROBJ) $(NAME_LEMI) $(NAME_VISU)
 $(NAME_LEMI)	:	data_lemi $(OBJS_LEMI)
 	@$(eval OBJ_LEN=$(shell echo "$(NAME)" | wc -c))
 	@$(eval CLEAN_LEN=$(shell echo "$$(tput cols)-6-$(OBJ_LEN)"|bc))
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS_LEMI) $(LIBS) $(LFLAGS)
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS_LEMI) $(LIBS)
 	@$(ECHO) "\r\033[38;5;040m✓ MAKE $(NAME)%.*s\033[0m\033[0m\n" $(CLEAN_LEN) $(CLEAN)
 data_lemi		:
 	@$(eval LEN=$(shell echo $$(/bin/echo -n $(NAME_LEMI) | wc -c)))
